@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPTICSHIELD STUDIO // Sunglasses &amp; Face Mask Vision AI</title>
+  <meta name="description" content="Modern optical & protective wear recognition studio powered by Teachable Machine and TensorFlow.js—built for public health screening, UV eyewear checks, and accessible daily independence." />
+
+  <!-- Google Fonts: Space Grotesk (Technical Optical Headers), Plus Jakarta Sans (Clean UI), JetBrains Mono (Telemetry Readouts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            alabaster: '#F6F8FA',
+            obsidian: '#0F172A',
+            polarized: '#D97706',
+            shieldteal: '#0D9488',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Subtle Precision Optical Grid & Frosted Glass Styling -->
+  <style>
+    body {
+      background-color: #F6F8FA;
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(13, 148, 136, 0.06) 0%, transparent 42%),
+        radial-gradient(circle at 85% 15%, rgba(217, 119, 6, 0.06) 0%, transparent 40%),
+        linear-gradient(to right, rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+
+  <!-- TensorFlow.js & Teachable Machine Image Library (Reliable jsDelivr CDNs) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js"></script>
+</head>
+<body class="text-obsidian font-sans antialiased selection:bg-shieldteal/20 selection:text-obsidian">
+
+  <!-- =====================================================================
+       STICKY OPTICAL & PROTECTIVE STUDIO HEADER
+       ===================================================================== -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-900/10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+      <!-- Optical & Protective Wear Brand Mark -->
+      <a href="#top" class="flex items-center gap-3 group focus:outline-none">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-obsidian text-white flex items-center justify-center border border-slate-800 shadow-xs group-hover:bg-shieldteal transition-colors">
+          <!-- Custom Sunglasses + Protective Shield Line-Art SVG -->
+          <svg class="w-6 h-6" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5H25" />
+            <path d="M4.5 10.5H12.2L11.2 16.5C10.9 18 9.6 19 8.1 19H6.5C5 19 3.8 17.8 3.8 16.3L4.5 10.5Z" />
+            <path d="M15.8 10.5H23.5L24.2 16.3C24.2 17.8 23 19 21.5 19H19.9C18.4 19 17.1 18 16.8 16.5L15.8 10.5Z" />
+            <path d="M12.2 12.2C13.3 11.4 14.7 11.4 15.8 12.2" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-display font-bold text-obsidian tracking-tight text-lg sm:text-xl block leading-none">
+            OPTICSHIELD STUDIO
+          </span>
+          <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500 mt-1 block">
+            OPTIC-SHIELD // TM-VISION
+          </span>
+        </div>
+      </a>
+
+      <!-- Studio Navigation -->
+      <nav class="hidden md:flex items-center gap-7 text-xs font-mono uppercase tracking-widest text-slate-600">
+        <a href="#detection-hub" class="hover:text-shieldteal transition-colors">01 // Lens &amp; Barrier Scanner</a>
+        <a href="#community-impact" class="hover:text-shieldteal transition-colors">02 // Community Impact</a>
+        <a href="#capture-guide" class="hover:text-shieldteal transition-colors">03 // Calibration Notes</a>
+      </nav>
+
+      <!-- Live Optical Model Telemetry Pill -->
+      <div id="model-status-pill" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-mono text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-900/10 transition-all">
+        <span id="model-status-dot" class="w-2 h-2 rounded-full bg-polarized animate-pulse"></span>
+        <span id="model-status-text">INITIALIZING OPTICS...</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="pb-24">
+    <!-- =====================================================================
+         OPTICAL & PROTECTIVE WEAR HERO SECTION
+         ===================================================================== -->
+    <section class="relative border-b border-slate-900/10 pt-10 pb-10 sm:pt-14 sm:pb-14">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <!-- Left Editorial & Technical Copy -->
+          <div class="lg:col-span-8 text-center lg:text-left">
+            <div class="inline-flex flex-wrap items-center justify-center lg:justify-start gap-2 px-3.5 py-1.5 rounded-full bg-white text-slate-800 font-mono text-[11px] tracking-wider uppercase mb-5 border border-slate-900/10 shadow-2xs">
+              <span class="w-1.5 h-1.5 rounded-full bg-shieldteal"></span>
+              <span>LENS &amp; BARRIER SCANNER • 100% LOCAL BROWSER INFERENCE</span>
+            </div>
+
+            <h1 class="font-display text-3xl sm:text-5xl lg:text-[3.35rem] font-bold text-obsidian tracking-tight leading-[1.08]">
+              Real-Time Vision for <span class="text-polarized">Sunglasses</span> &amp; <span class="text-shieldteal">Protective Masks</span>
+            </h1>
+
+            <p class="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+              An architectural optical &amp; protective wear diagnostic studio powered by Teachable Machine and TensorFlow.js. Instantly verify polarized eyewear and medical or N95 face masks using your live optical mirror or uploaded snapshots.
+            </p>
+
+            <div class="mt-7 flex flex-wrap items-center justify-center lg:justify-start gap-3.5">
+              <a href="#detection-hub" class="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-obsidian hover:bg-shieldteal text-white font-mono text-xs uppercase tracking-widest font-semibold shadow-xs transition-all">
+                <span>Launch Optical Scanner</span>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </a>
+              <a href="#community-impact" class="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white hover:bg-slate-100 text-obsidian font-mono text-xs uppercase tracking-widest font-medium border border-slate-900/15 transition-all">
+                <span>Why It Matters to Users</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Optical & Protective Wear Spec Card -->
+          <div class="lg:col-span-4">
+            <div class="glass-panel rounded-2xl border border-slate-900/10 p-5 sm:p-6 shadow-xs">
+              <div class="flex items-center justify-between border-b border-slate-900/10 pb-3 mb-4">
+                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">DETECTION SPECTRUM</span>
+                <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-shieldteal/10 text-shieldteal font-semibold border border-shieldteal/20">EDGE VISION</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <!-- Polarized Sunglasses Spec Tile -->
+                <div class="p-3.5 rounded-xl bg-white border border-slate-900/10 flex flex-col items-center text-center shadow-2xs">
+                  <!-- Sleek Wayfarer / Aviator Sunglasses SVG -->
+                  <svg class="w-12 h-12 text-polarized mb-2" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 15H36" />
+                    <path d="M6.5 15H17.5L16.1 23.5C15.7 25.6 13.9 27 11.8 27H9.6C7.5 27 5.8 25.3 5.8 23.2L6.5 15Z" />
+                    <path d="M22.5 15H33.5L34.2 23.2C34.2 25.3 32.5 27 30.4 27H28.2C26.1 27 24.3 25.6 23.9 23.5L22.5 15Z" />
+                    <path d="M17.5 17.5C19 16.3 21 16.3 22.5 17.5" />
+                    <path d="M9 18L12.5 23.5" stroke-opacity="0.55" />
+                    <path d="M25 18L28.5 23.5" stroke-opacity="0.55" />
+                  </svg>
+                  <span class="font-display font-bold text-sm text-obsidian">Sunglasses</span>
+                  <span class="font-mono text-[10px] text-slate-500 mt-0.5">Aviator • Wayfarer • UV</span>
+                </div>
+
+                <!-- Protective Face Mask Spec Tile -->
+                <div class="p-3.5 rounded-xl bg-white border border-slate-900/10 flex flex-col items-center text-center shadow-2xs">
+                  <!-- Pleated / N95 Respirator Face Mask SVG -->
+                  <svg class="w-12 h-12 text-shieldteal mb-2" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 14C13.5 11.8 26.5 11.8 30 14L28.8 25.2C28.4 28.4 24.5 30.5 20 30.5C15.5 30.5 11.6 28.4 11.2 25.2L10 14Z" />
+                    <path d="M10 15.5C7 15.5 5.5 17.5 5.5 20C5.5 22.5 7 24.2 10.8 24.2" />
+                    <path d="M30 15.5C33 15.5 34.5 17.5 34.5 20C34.5 22.5 33 24.2 29.2 24.2" />
+                    <path d="M14 18.5H26" stroke-opacity="0.65" />
+                    <path d="M14.5 22.5H25.5" stroke-opacity="0.65" />
+                    <path d="M16.5 26.2H23.5" stroke-opacity="0.65" />
+                  </svg>
+                  <span class="font-display font-bold text-sm text-obsidian">Face Masks</span>
+                  <span class="font-mono text-[10px] text-slate-500 mt-0.5">Pleated • N95 • Barrier</span>
+                </div>
+              </div>
+
+              <p class="mt-3.5 font-mono text-[11px] text-slate-500 leading-relaxed">
+                Ocular frame geometry and lower-face respiratory barrier contours are evaluated directly on-device.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DUAL-MODE INTERACTIVE DETECTION HUB
+         ===================================================================== -->
+    <section id="detection-hub" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+        <div>
+          <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-shieldteal font-semibold">
+            SECTION 01 // DIAGNOSTIC VIEWPORT
+          </span>
+          <h2 class="font-display text-2xl sm:text-4xl font-bold text-obsidian mt-1">
+            Lens &amp; Barrier Detection Studio
+          </h2>
+        </div>
+        <span class="font-mono text-xs text-slate-500">
+          Model ID: inYmKneaS • Client-Side WebGL
+        </span>
+      </div>
+
+      <!-- Accessible Inline Feedback Banner (Replaces alert()) -->
+      <div id="feedback-banner" class="hidden mb-6 p-4 rounded-2xl border flex items-start justify-between gap-3 transition-all" role="alert">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h3 id="feedback-title" class="font-mono text-xs uppercase tracking-wider font-bold">System Notice</h3>
+            <p id="feedback-message" class="text-xs sm:text-sm mt-1"></p>
+          </div>
+        </div>
+        <button type="button" onclick="hideBanner()" class="p-1.5 rounded-lg hover:bg-black/5 transition-colors cursor-pointer" aria-label="Dismiss notification">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        <!-- LEFT COLUMN (7 Cols): Dual-Mode Optical Mirror & Image Upload Testing -->
+        <div class="lg:col-span-7 glass-panel rounded-3xl border border-slate-900/10 shadow-xs overflow-hidden">
+          <!-- Mode Switcher Tabs -->
+          <div class="p-2 bg-slate-100/90 border-b border-slate-900/10 grid grid-cols-2 gap-2" role="tablist" aria-label="Optical scanner input mode">
+            <button
+              id="tab-webcam"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-webcam"
+              onclick="switchMode('webcam')"
+              class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-mono text-xs uppercase tracking-wider font-semibold transition-all bg-white text-obsidian shadow-2xs border border-slate-900/10 cursor-pointer"
+            >
+              <svg class="w-4 h-4 text-shieldteal" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Live Optical Mirror</span>
+            </button>
+
+            <button
+              id="tab-upload"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-upload"
+              onclick="switchMode('upload')"
+              class="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-mono text-xs uppercase tracking-wider font-semibold transition-all text-slate-600 hover:text-obsidian hover:bg-white/60 cursor-pointer"
+            >
+              <svg class="w-4 h-4 text-polarized" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>Image Upload Test</span>
+            </button>
+          </div>
+
+          <!-- TAB PANEL 1: LIVE OPTICAL MIRROR (WEBCAM) -->
+          <div id="panel-webcam" role="tabpanel" aria-labelledby="tab-webcam" class="p-5 sm:p-6">
+            <!-- Optical Viewfinder Viewport -->
+            <div class="relative w-full aspect-square sm:aspect-4/3 max-h-[430px] mx-auto rounded-2xl bg-obsidian overflow-hidden border border-slate-900/20 flex items-center justify-center shadow-inner">
+              <!-- Live Scanning Status Pill -->
+              <div id="webcam-live-badge" class="hidden absolute top-3.5 left-3.5 z-20 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-white font-mono text-[10px] tracking-widest uppercase border border-white/15">
+                <span class="w-2 h-2 rounded-full bg-shieldteal animate-ping"></span>
+                <span>OPTICAL SCAN // ACTIVE</span>
+              </div>
+
+              <!-- Camera Lens Orientation Pill -->
+              <div id="webcam-facing-badge" class="hidden absolute top-3.5 right-3.5 z-20 px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-slate-300 font-mono text-[10px] uppercase tracking-wider border border-white/15">
+                Front Mirror
+              </div>
+
+              <!-- Precision Optical Viewfinder Corner Reticle & Alignment Guides -->
+              <div id="webcam-reticle" class="hidden pointer-events-none absolute inset-5 z-10">
+                <span class="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-shieldteal rounded-tl-md"></span>
+                <span class="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-shieldteal rounded-tr-md"></span>
+                <span class="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-polarized rounded-bl-md"></span>
+                <span class="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-polarized rounded-br-md"></span>
+                <!-- Subtle Center Optical Crosshair -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 border border-white/25 rounded-full"></div>
+                <span class="absolute bottom-2 left-1/2 -translate-x-1/2 font-mono text-[9px] uppercase tracking-[0.22em] text-white/80 bg-slate-950/70 px-2.5 py-0.5 rounded border border-white/10">
+                  ALIGN EYEWEAR OR FACE MASK
+                </span>
+              </div>
+
+              <!-- Idle Optical Mirror Standby Placeholder -->
+              <div id="webcam-placeholder" class="text-center px-6 py-8 max-w-sm">
+                <div class="w-16 h-16 rounded-2xl bg-slate-800/90 text-shieldteal flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                  <!-- Combined Sunglasses & Protective Mask Line-Art Icon -->
+                  <svg class="w-9 h-9" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12.5H31" />
+                    <path d="M7 12.5H16L15 18.2C14.7 19.7 13.4 20.8 11.9 20.8H10.2C8.7 20.8 7.5 19.6 7.5 18.1L7 12.5Z" />
+                    <path d="M20 12.5H29L28.5 18.1C28.5 19.6 27.3 20.8 25.8 20.8H24.1C22.6 20.8 21.3 19.7 21 18.2L20 12.5Z" />
+                    <path d="M11 24.5C14 23.2 22 23.2 25 24.5L24.2 29.8C23.9 31.4 21.5 32.5 18 32.5C14.5 32.5 12.1 31.4 11.8 29.8L11 24.5Z" stroke="#D97706" />
+                  </svg>
+                </div>
+                <h3 class="font-display text-white font-bold text-xl">Optical Mirror Standby</h3>
+                <p class="text-slate-400 text-xs sm:text-sm mt-2 leading-relaxed">
+                  Click <strong class="text-white">Start Camera</strong> to activate real-time detection for sunglasses, protective face masks, or combined optical &amp; respiratory wear.
+                </p>
+              </div>
+
+              <!-- Teachable Machine Webcam Canvas Container -->
+              <div id="webcam-canvas-container" class="hidden w-full h-full flex items-center justify-center [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover"></div>
+            </div>
+
+            <!-- Webcam Action Bar -->
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2.5 flex-1">
+                <button
+                  id="btn-toggle-webcam"
+                  type="button"
+                  onclick="toggleWebcam()"
+                  disabled
+                  class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-obsidian hover:bg-shieldteal disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-2xs transition-all cursor-pointer"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  <span id="text-webcam-btn">Loading Model...</span>
+                </button>
+
+                <button
+                  id="btn-flip-camera"
+                  type="button"
+                  onclick="flipCamera()"
+                  class="hidden inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-obsidian font-mono text-xs uppercase tracking-wider font-semibold border border-slate-900/15 transition-all cursor-pointer"
+                  title="Switch between front mirror and rear camera"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Flip Camera</span>
+                </button>
+              </div>
+
+              <span class="font-mono text-[11px] text-slate-500 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-shieldteal" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                On-device stream • Zero upload
+              </span>
+            </div>
+          </div>
+
+          <!-- TAB PANEL 2: IMAGE UPLOAD TESTING -->
+          <div id="panel-upload" role="tabpanel" aria-labelledby="tab-upload" class="hidden p-5 sm:p-6">
+            <!-- Drag & Drop Photo Zone -->
+            <div
+              id="drop-zone"
+              tabindex="0"
+              role="button"
+              aria-label="Upload a photo of sunglasses or a face mask by clicking or dragging and dropping"
+              class="relative w-full min-h-[310px] sm:min-h-[360px] rounded-2xl border-2 border-dashed border-slate-900/20 hover:border-shieldteal bg-alabaster/80 hover:bg-teal-50/30 transition-all flex flex-col items-center justify-center p-6 text-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-shieldteal"
+            >
+              <input
+                id="image-file-input"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                onchange="handleFileSelect(event)"
+              />
+
+              <!-- Empty Uploader Prompt -->
+              <div id="upload-prompt" class="max-w-sm">
+                <div class="w-16 h-16 rounded-2xl bg-white text-polarized flex items-center justify-center mx-auto mb-4 border border-slate-900/10 shadow-2xs">
+                  <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 class="font-display text-obsidian font-bold text-xl">Drop Snapshot or Product Image</h3>
+                <p class="text-slate-600 text-xs sm:text-sm mt-2 leading-relaxed">
+                  Upload any photo featuring sunglasses, N95/surgical face masks, or portraits (JPG, PNG, WebP) to test model predictions immediately.
+                </p>
+                <span class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-obsidian font-mono uppercase tracking-wider font-semibold text-xs border border-slate-900/15 shadow-2xs">
+                  Select Image File
+                </span>
+              </div>
+
+              <!-- Uploaded Image Preview Container -->
+              <div id="upload-preview-wrapper" class="hidden w-full flex flex-col items-center">
+                <div class="relative max-h-[320px] rounded-xl overflow-hidden shadow-xs border border-slate-900/15 bg-white p-2">
+                  <img
+                    id="uploaded-image-preview"
+                    src=""
+                    alt="Uploaded sunglasses or face mask test image"
+                    class="max-h-[300px] w-auto object-contain mx-auto block rounded-lg"
+                  />
+                </div>
+                <p id="uploaded-file-name" class="mt-3 font-mono text-xs text-slate-500 truncate max-w-xs"></p>
+              </div>
+            </div>
+
+            <!-- Image Upload Action Controls -->
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onclick="document.getElementById('image-file-input').click()"
+                  class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-obsidian hover:bg-shieldteal text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-2xs transition-all cursor-pointer"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span>Browse File</span>
+                </button>
+
+                <button
+                  id="btn-sample-test"
+                  type="button"
+                  onclick="loadSampleTestCard()"
+                  class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-mono text-xs uppercase tracking-wider font-semibold border border-amber-300/80 transition-all cursor-pointer"
+                  title="Generate a geometric sunglasses & face mask test card to verify model inference immediately"
+                >
+                  <span>Load Sample Test Card</span>
+                </button>
+
+                <button
+                  id="btn-clear-upload"
+                  type="button"
+                  onclick="clearUploadedImage()"
+                  class="hidden inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 font-mono text-xs uppercase tracking-wider font-semibold border border-rose-200 transition-all cursor-pointer"
+                >
+                  <span>Clear</span>
+                </button>
+              </div>
+
+              <span class="font-mono text-[11px] text-slate-500">Tip: Paste image (Ctrl+V)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN (5 Cols): Real-Time Prediction & Optical Telemetry Dashboard -->
+        <div class="lg:col-span-5 space-y-6">
+          <!-- Primary Detection Card -->
+          <div id="top-prediction-card" class="glass-panel rounded-3xl border border-slate-900/10 p-6 shadow-xs transition-all">
+            <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-900/10">
+              <span class="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                PRIMARY DETECTION RESULT
+              </span>
+              <span id="confidence-tier-badge" class="px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider font-semibold bg-slate-100 text-slate-600 border border-slate-900/10">
+                Standby
+              </span>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between gap-4">
+              <div class="min-w-0 flex-1">
+                <h3 id="top-class-name" class="font-display text-2xl sm:text-3xl font-bold text-obsidian tracking-tight break-words leading-tight">
+                  Ready to Scan
+                </h3>
+
+                <div class="mt-2.5 flex items-baseline gap-2">
+                  <span id="top-class-score" class="font-mono text-3xl sm:text-4xl font-bold text-shieldteal tabular-nums">
+                    0.0%
+                  </span>
+                  <span class="font-mono text-[11px] uppercase tracking-wider text-slate-500">confidence</span>
+                </div>
+              </div>
+
+              <!-- Animated Circular Optical Confidence Ring -->
+              <div class="relative w-16 h-16 shrink-0 flex items-center justify-center" aria-hidden="true">
+                <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="#E2E8F0" stroke-width="6" />
+                  <circle
+                    id="confidence-ring-circle"
+                    cx="32"
+                    cy="32"
+                    r="26"
+                    fill="none"
+                    stroke="#0D9488"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    stroke-dasharray="163.36"
+                    stroke-dashoffset="163.36"
+                    class="transition-all duration-200 ease-out"
+                  />
+                </svg>
+                <span class="absolute font-mono text-[10px] font-bold text-slate-600">TOP-1</span>
+              </div>
+            </div>
+
+            <!-- Horizontal Confidence Progress Bar -->
+            <div class="mt-4 w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-900/5">
+              <div
+                id="top-confidence-bar"
+                class="h-full bg-shieldteal rounded-full transition-all duration-200 ease-out"
+                style="width: 0%"
+              ></div>
+            </div>
+
+            <!-- Contextual Diagnostic Feedback -->
+            <div id="prediction-guidance" class="mt-4 pt-4 border-t border-slate-900/10 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Activate <strong class="text-obsidian">Live Optical Mirror</strong> or upload a test image in <strong class="text-obsidian">Image Upload Test</strong> to classify sunglasses and protective face masks.
+            </div>
+          </div>
+
+          <!-- All-Classes Probability Breakdown Card -->
+          <div class="glass-panel rounded-3xl border border-slate-900/10 p-6 shadow-xs">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-900/10">
+              <div>
+                <h3 class="font-display text-lg font-bold text-obsidian">All-Classes Probability Breakdown</h3>
+                <p class="font-mono text-[11px] text-slate-500 mt-0.5">Live distribution across trained labels</p>
+              </div>
+              <span id="total-classes-badge" class="px-2.5 py-1 rounded-lg bg-slate-100 text-obsidian font-mono text-[11px] font-semibold border border-slate-900/10">
+                -- CLASSES
+              </span>
+            </div>
+
+            <!-- Dynamically Populated Progress Bars from model.getClassLabels() -->
+            <div id="predictions-list" class="space-y-4">
+              <div class="animate-pulse space-y-3">
+                <div class="h-4 bg-slate-100 rounded w-1/3"></div>
+                <div class="h-2.5 bg-slate-100 rounded w-full"></div>
+                <div class="h-4 bg-slate-100 rounded w-1/2 mt-4"></div>
+                <div class="h-2.5 bg-slate-100 rounded w-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         DEDICATED COMMUNITY SIGNIFICANCE & USER CONNECTION SECTION
+         ===================================================================== -->
+    <section id="community-impact" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24">
+      <div class="bg-white rounded-3xl border border-slate-900/10 shadow-xs overflow-hidden">
+        <!-- Dark Obsidian Architectural Banner -->
+        <div class="bg-obsidian text-white p-8 sm:p-12 relative overflow-hidden">
+          <div class="max-w-3xl relative z-10">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-shieldteal/20 text-teal-200 font-mono text-[10px] uppercase tracking-[0.2em] border border-shieldteal/30 mb-4">
+              SECTION 02 // COMMUNITY SIGNIFICANCE &amp; USER VALUE
+            </span>
+            <h2 class="font-display text-3xl sm:text-4xl lg:text-[2.6rem] font-bold tracking-tight leading-[1.12]">
+              Why Optical &amp; Protective Wear AI Matters to Our Community
+            </h2>
+            <p class="mt-4 text-slate-300 text-sm sm:text-base leading-relaxed">
+              Sunglasses and face masks are everyday essentials for UV eye protection, respiratory health, and safe shared spaces. By packaging a custom-trained Teachable Machine model into an instant, zero-install webpage, this studio bridges computer vision with real-world community wellness, accessibility, and privacy.
+            </p>
+          </div>
+        </div>
+
+        <!-- Direct Connection: How This Webpage's Features Serve Real Users -->
+        <div class="p-6 sm:p-10 border-b border-slate-900/10 bg-alabaster/70">
+          <div class="max-w-3xl mb-7">
+            <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-shieldteal font-semibold">
+              DIRECT WORKFLOW CONNECTION
+            </span>
+            <h3 class="font-display text-2xl sm:text-3xl font-bold text-obsidian mt-1">
+              How Each Tool on This Webpage Empowers Everyday Users
+            </h3>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+              Every control in the Lens &amp; Barrier Detection Studio above is built to solve practical, daily verification challenges without specialized hardware.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Pillar 1: Public Health & Workplace Compliance Screening -> Live Optical Mirror -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-900/10 flex flex-col justify-between shadow-2xs">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div class="w-11 h-11 rounded-xl bg-teal-50 text-shieldteal flex items-center justify-center border border-teal-200/70">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-slate-400">LIVE MIRROR</span>
+                </div>
+                <h4 class="font-display text-lg font-bold text-obsidian">
+                  Public Health &amp; Workplace Entry Screening
+                </h4>
+                <p class="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Clinics, laboratories, transit hubs, and community centers can run the <strong>Live Optical Mirror</strong> on any tablet or kiosk for fast, contactless verification of protective face masks and safety eyewear—reducing bottleneck queues while protecting staff.
+                </p>
+              </div>
+              <div class="mt-5 pt-3.5 border-t border-slate-900/10">
+                <a href="#detection-hub" onclick="activateModeAndScroll('webcam')" class="font-mono text-xs uppercase tracking-wider font-semibold text-shieldteal hover:text-obsidian inline-flex items-center gap-1.5 transition-colors">
+                  <span>Try Live Optical Mirror</span>
+                  <span>→</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Pillar 2: Accessibility & Daily Independence -> Real-Time Confidence Telemetry -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-900/10 flex flex-col justify-between shadow-2xs">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div class="w-11 h-11 rounded-xl bg-amber-50 text-polarized flex items-center justify-center border border-amber-200/80">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </div>
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-slate-400">VISUAL FEEDBACK</span>
+                </div>
+                <h4 class="font-display text-lg font-bold text-obsidian">
+                  Accessibility &amp; Independence for Low-Vision Users
+                </h4>
+                <p class="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  High-contrast confidence tiers (<em>High Clarity Match</em> vs. <em>Uncertain</em>) and large-type telemetry help visually impaired or elderly community members confirm whether their UV sunglasses or mask are positioned properly before stepping outdoors.
+                </p>
+              </div>
+              <div class="mt-5 pt-3.5 border-t border-slate-900/10">
+                <a href="#detection-hub" onclick="activateModeAndScroll('upload')" class="font-mono text-xs uppercase tracking-wider font-semibold text-polarized hover:text-obsidian inline-flex items-center gap-1.5 transition-colors">
+                  <span>Test with Image Upload</span>
+                  <span>→</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Pillar 3: Privacy-First Edge AI -> Zero Cloud Uploads -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-900/10 flex flex-col justify-between shadow-2xs">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div class="w-11 h-11 rounded-xl bg-slate-100 text-obsidian flex items-center justify-center border border-slate-300/80">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-slate-400">EDGE PRIVACY</span>
+                </div>
+                <h4 class="font-display text-lg font-bold text-obsidian">
+                  Privacy-First Edge AI (Zero Cloud Uploads)
+                </h4>
+                <p class="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Facial imagery is sensitive. Because TensorFlow.js executes neural inference 100% locally in your browser, webcam frames and uploaded photos never leave your device—building community trust with zero accounts or cloud storage.
+                </p>
+              </div>
+              <div class="mt-5 pt-3.5 border-t border-slate-900/10">
+                <span class="font-mono text-[11px] uppercase tracking-wider text-slate-500 inline-flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-shieldteal"></span>
+                  <span>Client-Side Verified</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Community Adoption Summary Bar -->
+        <div class="p-6 sm:px-10 sm:py-6 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p class="text-xs sm:text-sm text-slate-600 max-w-2xl">
+            <strong class="text-obsidian">Open &amp; Barrier-Free Deployment:</strong> Hosted cleanly as a single static HTML file on GitHub Pages, schools, eyewear pop-ups, and community health drives can share one link that works immediately on phones, tablets, and laptops.
+          </p>
+          <a href="#detection-hub" class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-obsidian hover:bg-shieldteal text-white font-mono text-xs uppercase tracking-wider font-semibold transition-colors">
+            <span>Back to Scanner</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         OPTICAL CALIBRATION & CAPTURE NOTES
+         ===================================================================== -->
+    <section id="capture-guide" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+      <div class="glass-panel border border-slate-900/10 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="max-w-2xl">
+          <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500 font-semibold">
+            SECTION 03 // OPTICAL CALIBRATION NOTES
+          </span>
+          <h3 class="font-display text-xl sm:text-2xl font-bold text-obsidian mt-1">Best Practices for Accurate Lens &amp; Mask Detection</h3>
+          <ul class="mt-3 space-y-2 text-xs sm:text-sm text-slate-700">
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-shieldteal font-bold">01.</span>
+              <span><strong>Center the Facial Zone:</strong> Keep eyewear frames and lower-face mask pleats inside the optical viewfinder reticle without cropping the bridge or ear loops.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-polarized font-bold">02.</span>
+              <span><strong>Minimize Lens Glare:</strong> Avoid harsh direct reflections across tinted sunglasses lenses so frame rims and temple contours remain crisp.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="font-mono text-obsidian font-bold">03.</span>
+              <span><strong>Verify Confidence Tiers:</strong> Scores at <strong>80% or higher</strong> indicate a High Clarity Match; lower values prompt adjusting angle or lighting.</span>
+            </li>
+          </ul>
+        </div>
+        <a href="#top" class="shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-obsidian hover:text-white text-obsidian font-mono text-xs uppercase tracking-wider font-semibold border border-slate-900/15 shadow-2xs transition-all">
+          <span>Return to Top</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================================================================
+       FOOTER
+       ===================================================================== -->
+  <footer class="bg-white border-t border-slate-900/10 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-slate-500">
+      <p>
+        OPTICSHIELD STUDIO // Powered by <strong class="text-obsidian">TensorFlow.js</strong> &amp; <strong class="text-obsidian">Google Teachable Machine</strong>
+      </p>
+      <p class="text-[11px] text-slate-400">
+        MODEL: inYmKneaS • SUNGLASSES &amp; FACE MASK VISION
+      </p>
+    </div>
+  </footer>
+
+  <!-- =====================================================================
+       JAVASCRIPT: TEACHABLE MACHINE INTEGRATION & OPTICAL STUDIO LOGIC
+       ===================================================================== -->
+  <script>
+    /**
+     * Teachable Machine Sunglasses & Face Mask Model URL
+     */
+    const RAW_MODEL_URL = "https://teachablemachine.withgoogle.com/models/inYmKneaS/";
+    const MODEL_BASE_URL = RAW_MODEL_URL.endsWith("/") ? RAW_MODEL_URL : RAW_MODEL_URL + "/";
+
+    // Application State
+    let model = null;
+    let totalClasses = 0;
+    let classLabels = [];
+
+    let webcam = null;
+    let isWebcamRunning = false;
+    let animationFrameId = null;
+    let useFrontCamera = true;
+    let activeMode = "webcam"; // 'webcam' | 'upload'
+
+    // Circumference for r=26 SVG circle (2 * Math.PI * 26)
+    const RING_CIRCUMFERENCE = 163.36;
+
+    /**
+     * Initialize model, drag-and-drop listeners, clipboard paste, and tab visibility handling
+     */
+    window.addEventListener("DOMContentLoaded", async () => {
+      setupDragAndDrop();
+      setupClipboardPaste();
+      setupVisibilityPause();
+      await initModel();
+    });
+
+    /**
+     * Loads model.json and metadata.json from Teachable Machine CDN
+     */
+    async function initModel() {
+      const statusPill = document.getElementById("model-status-pill");
+      const statusDot = document.getElementById("model-status-dot");
+      const statusText = document.getElementById("model-status-text");
+      const webcamBtn = document.getElementById("btn-toggle-webcam");
+      const webcamBtnText = document.getElementById("text-webcam-btn");
+
+      try {
+        const modelURL = MODEL_BASE_URL + "model.json";
+        const metadataURL = MODEL_BASE_URL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        totalClasses = model.getTotalClasses();
+        classLabels = model.getClassLabels();
+
+        // Update Header Status Pill to Ready
+        statusPill.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-mono text-[11px] font-semibold bg-teal-50 text-shieldteal border border-shieldteal/25 transition-all";
+        statusDot.className = "w-2 h-2 rounded-full bg-shieldteal";
+        statusText.textContent = `OPTICS READY // ${totalClasses} CLASSES`;
+
+        // Enable Start Camera Button
+        webcamBtn.disabled = false;
+        webcamBtnText.textContent = "Start Camera";
+
+        // Populate Initial Probability Breakdown at 0%
+        document.getElementById("total-classes-badge").textContent = `${totalClasses} ${totalClasses === 1 ? "CLASS" : "CLASSES"}`;
+        const initialPredictions = classLabels.map((label) => ({
+          className: label,
+          probability: 0
+        }));
+        renderPredictionBars(initialPredictions, false);
+
+      } catch (error) {
+        console.error("Failed to load Teachable Machine model:", error);
+
+        statusPill.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-mono text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200 transition-all";
+        statusDot.className = "w-2 h-2 rounded-full bg-rose-500";
+        statusText.textContent = "OPTICS OFFLINE";
+
+        webcamBtnText.textContent = "Model Unavailable";
+
+        showBanner(
+          "error",
+          "Unable to Load Teachable Machine Model",
+          "Please verify your internet connection and ensure the model at https://teachablemachine.withgoogle.com/models/inYmKneaS/ is publicly shared, then refresh the page."
+        );
+      }
+    }
+
+    /**
+     * Automatically pause active webcam stream if user switches browser tabs or minimizes window
+     */
+    function setupVisibilityPause() {
+      document.addEventListener("visibilitychange", async () => {
+        if (document.hidden && isWebcamRunning) {
+          await stopWebcam();
+          showBanner(
+            "info",
+            "Live Optical Mirror Paused",
+            "Your camera feed was automatically paused while the browser tab was inactive to protect privacy and conserve battery."
+          );
+        }
+      });
+    }
+
+    /**
+     * Helper used by Community Significance cards to switch mode and scroll smoothly to the scanner
+     */
+    async function activateModeAndScroll(mode) {
+      await switchMode(mode);
+    }
+
+    /**
+     * Switches between 'webcam' (Live Optical Mirror) and 'upload' (Image Upload Test)
+     */
+    async function switchMode(mode) {
+      if (activeMode === mode) return;
+      activeMode = mode;
+
+      const tabWebcam = document.getElementById("tab-webcam");
+      const tabUpload = document.getElementById("tab-upload");
+      const panelWebcam = document.getElementById("panel-webcam");
+      const panelUpload = document.getElementById("panel-upload");
+
+      const activeTabClasses = "flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-mono text-xs uppercase tracking-wider font-semibold transition-all bg-white text-obsidian shadow-2xs border border-slate-900/10 cursor-pointer";
+      const inactiveTabClasses = "flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-mono text-xs uppercase tracking-wider font-semibold transition-all text-slate-600 hover:text-obsidian hover:bg-white/60 cursor-pointer";
+
+      if (mode === "webcam") {
+        tabWebcam.className = activeTabClasses;
+        tabWebcam.setAttribute("aria-selected", "true");
+        tabUpload.className = inactiveTabClasses;
+        tabUpload.setAttribute("aria-selected", "false");
+
+        panelWebcam.classList.remove("hidden");
+        panelUpload.classList.add("hidden");
+      } else {
+        // Pause camera stream when switching to Upload mode
+        if (isWebcamRunning) {
+          await stopWebcam();
+        }
+
+        tabUpload.className = activeTabClasses;
+        tabUpload.setAttribute("aria-selected", "true");
+        tabWebcam.className = inactiveTabClasses;
+        tabWebcam.setAttribute("aria-selected", "false");
+
+        panelUpload.classList.remove("hidden");
+        panelWebcam.classList.add("hidden");
+
+        // Re-run classification if an uploaded image is already loaded
+        const previewImg = document.getElementById("uploaded-image-preview");
+        if (previewImg && previewImg.src && !document.getElementById("upload-preview-wrapper").classList.contains("hidden")) {
+          await classifyImageElement(previewImg);
+        }
+      }
+    }
+
+    /**
+     * Toggles the webcam stream on or off
+     */
+    async function toggleWebcam() {
+      if (!model) return;
+      if (isWebcamRunning) {
+        await stopWebcam();
+      } else {
+        await startWebcam();
+      }
+    }
+
+    /**
+     * Initializes and starts the Teachable Machine webcam stream
+     */
+    async function startWebcam() {
+      const btn = document.getElementById("btn-toggle-webcam");
+      const btnText = document.getElementById("text-webcam-btn");
+      const placeholder = document.getElementById("webcam-placeholder");
+      const canvasContainer = document.getElementById("webcam-canvas-container");
+      const liveBadge = document.getElementById("webcam-live-badge");
+      const facingBadge = document.getElementById("webcam-facing-badge");
+      const reticle = document.getElementById("webcam-reticle");
+      const flipBtn = document.getElementById("btn-flip-camera");
+
+      hideBanner();
+      btn.disabled = true;
+      btnText.textContent = "Starting Camera...";
+
+      try {
+        const flip = useFrontCamera;
+        webcam = new tmImage.Webcam(400, 400, flip);
+
+        await webcam.setup({
+          facingMode: useFrontCamera ? "user" : "environment"
+        });
+        await webcam.play();
+
+        isWebcamRunning = true;
+
+        canvasContainer.innerHTML = "";
+        canvasContainer.appendChild(webcam.canvas);
+
+        placeholder.classList.add("hidden");
+        canvasContainer.classList.remove("hidden");
+        liveBadge.classList.remove("hidden");
+        facingBadge.classList.remove("hidden");
+        facingBadge.textContent = useFrontCamera ? "Front Mirror" : "Rear Lens";
+        reticle.classList.remove("hidden");
+        flipBtn.classList.remove("hidden");
+
+        btn.disabled = false;
+        btn.className = "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-2xs transition-all cursor-pointer";
+        btnText.textContent = "Stop Camera";
+
+        animationFrameId = window.requestAnimationFrame(webcamLoop);
+
+      } catch (err) {
+        console.error("Webcam initialization failed:", err);
+        isWebcamRunning = false;
+        btn.disabled = false;
+        btn.className = "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-obsidian hover:bg-shieldteal text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-2xs transition-all cursor-pointer";
+        btnText.textContent = "Start Camera";
+
+        showBanner(
+          "warning",
+          "Camera Access Denied or Unavailable",
+          "Please allow camera permissions in your browser settings, or switch to 'Image Upload Test' to evaluate sunglasses and face mask photos directly."
+        );
+      }
+    }
+
+    /**
+     * Stops the webcam stream and cancels the inference loop
+     */
+    async function stopWebcam() {
+      isWebcamRunning = false;
+
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+
+      if (webcam) {
+        try {
+          await webcam.stop();
+        } catch (e) {
+          console.warn("Error stopping webcam:", e);
+        }
+        webcam = null;
+      }
+
+      const btn = document.getElementById("btn-toggle-webcam");
+      const btnText = document.getElementById("text-webcam-btn");
+      const placeholder = document.getElementById("webcam-placeholder");
+      const canvasContainer = document.getElementById("webcam-canvas-container");
+      const liveBadge = document.getElementById("webcam-live-badge");
+      const facingBadge = document.getElementById("webcam-facing-badge");
+      const reticle = document.getElementById("webcam-reticle");
+      const flipBtn = document.getElementById("btn-flip-camera");
+
+      canvasContainer.innerHTML = "";
+      canvasContainer.classList.add("hidden");
+      placeholder.classList.remove("hidden");
+      liveBadge.classList.add("hidden");
+      facingBadge.classList.add("hidden");
+      reticle.classList.add("hidden");
+      flipBtn.classList.add("hidden");
+
+      btn.disabled = false;
+      btn.className = "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-obsidian hover:bg-shieldteal text-white font-mono text-xs uppercase tracking-wider font-semibold shadow-2xs transition-all cursor-pointer";
+      btnText.textContent = "Start Camera";
+    }
+
+    /**
+     * Flips between front ('user') and rear ('environment') camera on mobile/tablets
+     */
+    async function flipCamera() {
+      useFrontCamera = !useFrontCamera;
+      if (isWebcamRunning) {
+        await stopWebcam();
+        await startWebcam();
+      }
+    }
+
+    /**
+     * Smooth real-time inference loop for webcam frames
+     */
+    async function webcamLoop() {
+      if (!isWebcamRunning || !webcam || !model) return;
+
+      webcam.update();
+      await classifyImageElement(webcam.canvas);
+
+      if (isWebcamRunning) {
+        animationFrameId = window.requestAnimationFrame(webcamLoop);
+      }
+    }
+
+    /**
+     * Configures drag-and-drop events for the Image Upload dropzone
+     */
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("image-file-input");
+
+      dropZone.addEventListener("click", (e) => {
+        if (e.target.tagName !== "BUTTON") {
+          fileInput.click();
+        }
+      });
+
+      dropZone.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.add("border-shieldteal", "bg-teal-50/40");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove("border-shieldteal", "bg-teal-50/40");
+        });
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        const files = e.dataTransfer?.files;
+        if (files && files.length > 0) {
+          processUploadedFile(files[0]);
+        }
+      });
+    }
+
+    /**
+     * Supports pasting images directly from clipboard (Ctrl+V / Cmd+V)
+     */
+    function setupClipboardPaste() {
+      window.addEventListener("paste", async (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+            if (file) {
+              if (activeMode !== "upload") {
+                await switchMode("upload");
+              }
+              processUploadedFile(file);
+              break;
+            }
+          }
+        }
+      });
+    }
+
+    /**
+     * Handles standard file picker selection
+     */
+    function handleFileSelect(event) {
+      const file = event.target.files?.[0];
+      if (file) {
+        processUploadedFile(file);
+      }
+    }
+
+    /**
+     * Reads uploaded image file, renders preview, and runs model inference
+     */
+    function processUploadedFile(file) {
+      if (!file.type.startsWith("image/")) {
+        showBanner("warning", "Invalid File Type", "Please select a valid image file (JPG, PNG, WebP, or GIF).");
+        return;
+      }
+
+      hideBanner();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imgEl = document.getElementById("uploaded-image-preview");
+        imgEl.onload = async () => {
+          document.getElementById("upload-prompt").classList.add("hidden");
+          document.getElementById("upload-preview-wrapper").classList.remove("hidden");
+          document.getElementById("btn-clear-upload").classList.remove("hidden");
+          document.getElementById("uploaded-file-name").textContent = `FILE // ${file.name}`;
+
+          await classifyImageElement(imgEl);
+        };
+        imgEl.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /**
+     * Generates a clean geometric sunglasses + protective face mask sample test card
+     * so users or evaluators can immediately verify model inference without a local photo
+     */
+    function loadSampleTestCard() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 340;
+      canvas.height = 340;
+      const ctx = canvas.getContext("2d");
+
+      // Frosted optical clinic backdrop
+      ctx.fillStyle = "#F6F8FA";
+      ctx.fillRect(0, 0, 340, 340);
+
+      // Subtle calibration ring
+      ctx.strokeStyle = "rgba(13, 148, 136, 0.25)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(170, 170, 128, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Draw Polarized Sunglasses Silhouette (Top Half)
+      ctx.fillStyle = "#0F172A";
+      ctx.fillRect(62, 102, 216, 10); // Top brow bar
+
+      // Left lens
+      ctx.beginPath();
+      ctx.roundRect(68, 108, 92, 54, [6, 6, 22, 22]);
+      ctx.fill();
+
+      // Right lens
+      ctx.beginPath();
+      ctx.roundRect(180, 108, 92, 54, [6, 6, 22, 22]);
+      ctx.fill();
+
+      // Amber polarized lens reflection streaks
+      ctx.strokeStyle = "#D97706";
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(86, 120);
+      ctx.lineTo(108, 148);
+      ctx.moveTo(198, 120);
+      ctx.lineTo(220, 148);
+      ctx.stroke();
+
+      // Draw Protective Pleated Face Mask Silhouette (Bottom Half)
+      ctx.fillStyle = "#0D9488";
+      ctx.beginPath();
+      ctx.roundRect(92, 186, 156, 86, [14, 14, 34, 34]);
+      ctx.fill();
+
+      // Mask ear loops
+      ctx.strokeStyle = "#64748B";
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(92, 224, 24, Math.PI * 0.55, Math.PI * 1.45);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(248, 224, 24, -Math.PI * 0.45, Math.PI * 0.45);
+      ctx.stroke();
+
+      // Pleat lines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(114, 212);
+      ctx.lineTo(226, 212);
+      ctx.moveTo(116, 232);
+      ctx.lineTo(224, 232);
+      ctx.moveTo(124, 252);
+      ctx.lineTo(216, 252);
+      ctx.stroke();
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const imgEl = document.getElementById("uploaded-image-preview");
+      imgEl.onload = async () => {
+        document.getElementById("upload-prompt").classList.add("hidden");
+        document.getElementById("upload-preview-wrapper").classList.remove("hidden");
+        document.getElementById("btn-clear-upload").classList.remove("hidden");
+        document.getElementById("uploaded-file-name").textContent = "SAMPLE // optic-shield-test-card.png";
+        await classifyImageElement(imgEl);
+      };
+      imgEl.src = dataUrl;
+    }
+
+    /**
+     * Clears the uploaded photo and resets the telemetry dashboard
+     */
+    function clearUploadedImage() {
+      const fileInput = document.getElementById("image-file-input");
+      const imgEl = document.getElementById("uploaded-image-preview");
+
+      fileInput.value = "";
+      imgEl.src = "";
+
+      document.getElementById("upload-preview-wrapper").classList.add("hidden");
+      document.getElementById("upload-prompt").classList.remove("hidden");
+      document.getElementById("btn-clear-upload").classList.add("hidden");
+      document.getElementById("uploaded-file-name").textContent = "";
+
+      resetDashboard();
+    }
+
+    /**
+     * Runs model.predict() on any HTMLImageElement, HTMLVideoElement, or HTMLCanvasElement
+     */
+    async function classifyImageElement(element) {
+      if (!model) return;
+
+      try {
+        const predictions = await model.predict(element);
+        const sorted = [...predictions].sort((a, b) => b.probability - a.probability);
+        updateDashboard(sorted);
+      } catch (err) {
+        console.error("Prediction error:", err);
+      }
+    }
+
+    /**
+     * Updates the Primary Detection Card, animated ring, and All-Classes Breakdown
+     */
+    function updateDashboard(sortedPredictions) {
+      if (!sortedPredictions || sortedPredictions.length === 0) return;
+
+      const top = sortedPredictions[0];
+      const clampedProb = Math.max(0, Math.min(1, top.probability));
+      const pct = (clampedProb * 100).toFixed(1);
+
+      const topNameEl = document.getElementById("top-class-name");
+      const topScoreEl = document.getElementById("top-class-score");
+      const topBarEl = document.getElementById("top-confidence-bar");
+      const ringEl = document.getElementById("confidence-ring-circle");
+      const badgeEl = document.getElementById("confidence-tier-badge");
+      const guidanceEl = document.getElementById("prediction-guidance");
+
+      topNameEl.textContent = top.className;
+      topScoreEl.textContent = `${pct}%`;
+      topBarEl.style.width = `${clampedProb * 100}%`;
+
+      // Update Circular SVG Progress Ring
+      const dashOffset = RING_CIRCUMFERENCE * (1 - clampedProb);
+      ringEl.style.strokeDashoffset = dashOffset.toFixed(2);
+
+      // Apply Confidence Tiers:
+      // 1. High Clarity Match (>= 80%, emerald/teal accent)
+      // 2. Moderate Fit (50% - 79%, polarized amber accent)
+      // 3. Uncertain / Adjust Angle (< 50%, neutral slate accent)
+      if (clampedProb >= 0.8) {
+        badgeEl.className = "px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider font-semibold bg-teal-50 text-shieldteal border border-teal-200";
+        badgeEl.textContent = "High Clarity Match";
+        topScoreEl.className = "font-mono text-3xl sm:text-4xl font-bold text-shieldteal tabular-nums";
+        topBarEl.className = "h-full bg-shieldteal rounded-full transition-all duration-200 ease-out";
+        ringEl.setAttribute("stroke", "#0D9488");
+        guidanceEl.innerHTML = `High-clarity detection for <strong class="text-obsidian">${escapeHtml(top.className)}</strong>. Optical contours and barrier features align strongly with this category.`;
+      } else if (clampedProb >= 0.5) {
+        badgeEl.className = "px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider font-semibold bg-amber-50 text-polarized border border-amber-200";
+        badgeEl.textContent = "Moderate Fit";
+        topScoreEl.className = "font-mono text-3xl sm:text-4xl font-bold text-polarized tabular-nums";
+        topBarEl.className = "h-full bg-polarized rounded-full transition-all duration-200 ease-out";
+        ringEl.setAttribute("stroke", "#D97706");
+        guidanceEl.innerHTML = `Moderate fit for <strong class="text-obsidian">${escapeHtml(top.className)}</strong>. Center the frames or face mask and ensure balanced lighting for higher certainty.`;
+      } else {
+        badgeEl.className = "px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider font-semibold bg-slate-100 text-slate-600 border border-slate-200";
+        badgeEl.textContent = "Uncertain / Adjust Angle";
+        topScoreEl.className = "font-mono text-3xl sm:text-4xl font-bold text-slate-600 tabular-nums";
+        topBarEl.className = "h-full bg-slate-400 rounded-full transition-all duration-200 ease-out";
+        ringEl.setAttribute("stroke", "#64748B");
+        guidanceEl.textContent = "Uncertain reading. Adjust viewing angle, reduce harsh lens glare, or move closer to the optical viewfinder.";
+      }
+
+      renderPredictionBars(sortedPredictions, true);
+    }
+
+    /**
+     * Renders horizontal probability progress bars for every class in the model
+     */
+    function renderPredictionBars(predictions, hasActiveResult) {
+      const container = document.getElementById("predictions-list");
+
+      container.innerHTML = predictions
+        .map((item, idx) => {
+          const clamped = Math.max(0, Math.min(1, item.probability));
+          const percent = (clamped * 100).toFixed(1);
+          const isTop = hasActiveResult && idx === 0 && clamped > 0.05;
+
+          const barColor = isTop
+            ? clamped >= 0.8
+              ? "bg-shieldteal"
+              : clamped >= 0.5
+              ? "bg-polarized"
+              : "bg-slate-500"
+            : "bg-slate-300";
+
+          const labelStyle = isTop ? "font-bold text-obsidian" : "font-medium text-slate-700";
+          const pctStyle = isTop ? "font-semibold text-obsidian" : "font-normal text-slate-500";
+
+          return `
+            <div>
+              <div class="flex items-center justify-between text-xs sm:text-sm mb-1.5 gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="font-mono text-[10px] text-slate-400">0${idx + 1}</span>
+                  <span class="${labelStyle} truncate">${escapeHtml(item.className)}</span>
+                </div>
+                <span class="font-mono text-xs ${pctStyle} tabular-nums shrink-0">${percent}%</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full ${barColor} rounded-full transition-all duration-150 ease-out"
+                  style="width: ${clamped * 100}%"
+                ></div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    /**
+     * Resets the prediction dashboard back to idle standby state
+     */
+    function resetDashboard() {
+      document.getElementById("top-class-name").textContent = "Ready to Scan";
+      document.getElementById("top-class-score").textContent = "0.0%";
+      document.getElementById("top-class-score").className = "font-mono text-3xl sm:text-4xl font-bold text-shieldteal tabular-nums";
+      document.getElementById("top-confidence-bar").style.width = "0%";
+      document.getElementById("top-confidence-bar").className = "h-full bg-shieldteal rounded-full transition-all duration-200 ease-out";
+
+      const ringEl = document.getElementById("confidence-ring-circle");
+      ringEl.style.strokeDashoffset = RING_CIRCUMFERENCE.toFixed(2);
+      ringEl.setAttribute("stroke", "#0D9488");
+
+      const badgeEl = document.getElementById("confidence-tier-badge");
+      badgeEl.className = "px-2.5 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider font-semibold bg-slate-100 text-slate-600 border border-slate-900/10";
+      badgeEl.textContent = "Standby";
+
+      document.getElementById("prediction-guidance").innerHTML =
+        'Activate <strong class="text-obsidian">Live Optical Mirror</strong> or upload a test image in <strong class="text-obsidian">Image Upload Test</strong> to classify sunglasses and protective face masks.';
+
+      if (classLabels.length > 0) {
+        renderPredictionBars(
+          classLabels.map((label) => ({ className: label, probability: 0 })),
+          false
+        );
+      }
+    }
+
+    /**
+     * Displays an accessible inline alert banner (never uses alert())
+     */
+    function showBanner(type, title, message) {
+      const banner = document.getElementById("feedback-banner");
+      const titleEl = document.getElementById("feedback-title");
+      const msgEl = document.getElementById("feedback-message");
+
+      const styles = {
+        error: "mb-6 p-4 rounded-2xl border bg-rose-50 border-rose-200 text-rose-900 flex items-start justify-between gap-3",
+        warning: "mb-6 p-4 rounded-2xl border bg-amber-50/90 border-amber-300/80 text-amber-950 flex items-start justify-between gap-3",
+        info: "mb-6 p-4 rounded-2xl border bg-teal-50/80 border-teal-200 text-slate-900 flex items-start justify-between gap-3"
+      };
+
+      banner.className = styles[type] || styles.info;
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      banner.classList.remove("hidden");
+    }
+
+    function hideBanner() {
+      document.getElementById("feedback-banner").classList.add("hidden");
+    }
+
+    /**
+     * Escapes HTML strings to safely render model class labels
+     */
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
